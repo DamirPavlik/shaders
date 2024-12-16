@@ -20,18 +20,23 @@ function run(canvas) {
     const vertexShaderSource = `
         attribute vec2 aPosition;
         void main() {
-            gl_Position = vec4(aPosition, 0.0, 1.0)
+            gl_Position = vec4(aPosition, 0.0, 1.0);
         }
     `;
 
     const fragmentShaderSource = `
         precision mediump float;
+        uniform vec2 u_pos;
+        uniform float u_window_diag;
         void main() {
-            gl_FragColor = vec4(0.39, 0.58, 0.93, 1.0); // Cornflower blue
+            vec4 red = vec4(1.0, 0.0, 0.0, 1.0);
+            float dist = distance(gl_FragCoord.xy, u_pos);
+            red = red * (dist / u_window_diag);
+            gl_FragColor = red;
         }
     `;
 
-    function compileShader(gl, type, source) {
+    function compileShader(source, type) {
         const shader = gl.createShader(type);
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
@@ -72,7 +77,29 @@ function run(canvas) {
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 3);
+    // gl.drawArrays(gl.TRIANGLE_STRIP, 0, 3);
+
+    const uPosLocation = gl.getUniformLocation(program, "u_pos");
+    const uWindowDiag = gl.getUniformLocation(program, "u_window_diag");
+
+    canvas.addEventListener("mousemove", (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = rect.bottom - event.clientY;
+        gl.uniform2f(uPosLocation, mouseX, mouseY);
+        
+        const ww = rect.width * rect.width;
+        const hh = rect.height * rect.height;
+        gl.uniform1f(uWindowDiag, Math.sqrt(ww + hh));
+    });
+
+    function render() {
+        gl.clearColor(0,0,0,1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(render);
+    }
+    render();
 }
 
 run(canvas);
