@@ -64,9 +64,12 @@ function run(canvas) {
     gl.useProgram(program);
 
     const vertices = new Float32Array([
-        -1, -1,
-        3, -1,
-        -1, 3
+        1, -1,
+        0, -1,
+        1, 0,
+        1, 1,
+        0, 1,
+        1, 0
     ]);
 
     const buffer = gl.createBuffer();
@@ -76,8 +79,6 @@ function run(canvas) {
     const positionLocation = gl.getAttribLocation(program, 'aPosition');
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-    // gl.drawArrays(gl.TRIANGLE_STRIP, 0, 3);
 
     const uPosLocation = gl.getUniformLocation(program, "u_pos");
     const uWindowDiag = gl.getUniformLocation(program, "u_window_diag");
